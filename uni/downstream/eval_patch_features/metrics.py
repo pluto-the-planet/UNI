@@ -6,6 +6,9 @@ from sklearn.metrics import (
     accuracy_score,
     cohen_kappa_score,
     classification_report,
+    precision_score,
+    recall_score,
+    confusion_matrix
 )
 
 def get_eval_metrics(
@@ -36,11 +39,26 @@ def get_eval_metrics(
     acc = accuracy_score(targets_all, preds_all)
     cls_rep = classification_report(targets_all, preds_all, output_dict=True, zero_division=0)
 
+    precision = precision_score(targets_all, preds_all, average='weighted', zero_division=0)
+    recall = recall_score(targets_all, preds_all, average='weighted', zero_division=0)
+    conf_matrix = confusion_matrix(targets_all, preds_all)
+    
+    # Sensitivity (Recall for positive class)
+    sensitivity = recall_score(targets_all, preds_all, pos_label=1, zero_division=0)
+    
+    # Specificity (Recall for negative class)
+    specificity = recall_score(targets_all, preds_all, pos_label=0, zero_division=0)
+
     eval_metrics = {
         f"{prefix}acc": acc,
         f"{prefix}bacc": bacc,
         f"{prefix}kappa": kappa,
         f"{prefix}weighted_f1": cls_rep["weighted avg"]["f1-score"],
+        f"{prefix}precision": precision,
+        f"{prefix}recall": recall,
+        f"{prefix}sensitivity": sensitivity,
+        f"{prefix}specificity": specificity,
+        f"{prefix}confusion_matrix": conf_matrix.tolist()  # Convert to list for JSON compatibility
     }
 
     if get_report:
@@ -57,4 +75,15 @@ def print_metrics(eval_metrics):
         if "report" in k:
             continue
         
-        print(f"Test {k}: {v:.3f}")
+        if isinstance(v, float) or isinstance(v, int):
+            print(f"Test {k}: {v:.3f}")
+        else:
+            print(f"Test {k}: {v}")
+
+# Example usage:
+# targets_all = [true_labels]
+# preds_all = [predicted_labels]
+# probs_all = [predicted_probabilities] # If applicable
+
+# metrics = get_eval_metrics(targets_all, preds_all, probs_all, prefix="test_", get_report=True)
+# print_metrics(metrics)
