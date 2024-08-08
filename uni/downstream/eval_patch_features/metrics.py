@@ -44,10 +44,12 @@ def get_eval_metrics(
     conf_matrix = confusion_matrix(targets_all, preds_all)
     
     # Sensitivity (Recall for positive class)
-    sensitivity = recall_score(targets_all, preds_all, pos_label=1, zero_division=0)
+    #sensitivity = recall_score(targets_all, preds_all, pos_label=1, zero_division=0)
+    sensitivity = recall_score(targets_all, preds_all, pos_label=1, average='micro', zero_division=0)
+
     
     # Specificity (Recall for negative class)
-    specificity = recall_score(targets_all, preds_all, pos_label=0, zero_division=0)
+    specificity = recall_score(targets_all, preds_all, pos_label=0, average='micro', zero_division=0)
 
     eval_metrics = {
         f"{prefix}acc": acc,
