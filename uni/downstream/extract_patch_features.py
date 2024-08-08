@@ -16,35 +16,37 @@ def extract_patch_features_from_dataloader(model, dataloader):
         dataloader (torch.utils.data.DataLoader): torch.utils.data.DataLoader object of N images.
 
     Returns:
-        dict: Dictionary object that contains (1) [N x D]-dim np.array of feature embeddings, and (2) [N x 1]-dim np.array of labels
-
+        dict: Dictionary object that contains (1) [N x D]-dim np.array of feature embeddings, (2) [N x 1]-dim np.array of labels,
+              and (3) [N x 1]-dim list of patient names.
     """
-    all_embeddings, all_labels = [], []
+    all_embeddings, all_labels, all_patient_names = [], [], []
     batch_size = dataloader.batch_size
-    device = next(model.parameters())[0].device
+    device = next(model.parameters()).device
 
-    for batch_idx, (batch, target) in tqdm(
+    for batch_idx, (patient_names, labels, images) in tqdm(
         enumerate(dataloader), total=len(dataloader)
     ):
-        remaining = batch.shape[0]
+        remaining = images.shape[0]
         if remaining != batch_size:
-            _ = torch.zeros((batch_size - remaining,) + batch.shape[1:]).type(
-                batch.type()
+            _ = torch.zeros((batch_size - remaining,) + images.shape[1:]).type(
+                images.type()
             )
-            batch = torch.vstack([batch, _])
+            images = torch.vstack([images, _])
 
-        batch = batch.to(device)
+        images = images.to(device)
         with torch.inference_mode():
-            embeddings = model(batch).detach().cpu()[:remaining, :].cpu()
-            labels = target.numpy()[:remaining]
+            embeddings = model(images).detach().cpu()[:remaining, :]
+            labels = labels.numpy()[:remaining]
             assert not torch.isnan(embeddings).any()
 
         all_embeddings.append(embeddings)
         all_labels.append(labels)
+        all_patient_names.extend(patient_names[:remaining])  # Collect patient names
 
     asset_dict = {
         "embeddings": np.vstack(all_embeddings).astype(np.float32),
         "labels": np.concatenate(all_labels),
+        "patient_names": all_patient_names,
     }
 
     return asset_dict
