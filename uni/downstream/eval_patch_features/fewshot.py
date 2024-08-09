@@ -103,6 +103,8 @@ def eval_knn(
 
 
 
+import matplotlib.pyplot as plt
+
 def eval_fewshot(
     train_feats: torch.Tensor,
     train_labels: torch.Tensor,
@@ -117,7 +119,7 @@ def eval_fewshot(
     average_feats: bool = True,
 ) -> Tuple[pd.DataFrame, dict]:
     """
-    Evaluate few-shot learning performance.
+    Evaluate few-shot learning performance and plot accuracy after every 20 epochs.
 
     Args:
         train_feats (torch.Tensor): Training features.
@@ -158,12 +160,16 @@ def eval_fewshot(
         n_query,
     )
 
+    # Initialize lists to store accuracies
+    accuracy_list = []
+    epoch_list = []
+
     # test model on dataset -- really more tasks than batches
     results_all = []
     n_way = n_way
     n_shot = n_shot
 
-    for task in tqdm(fewshot_sampler):
+    for epoch, task in enumerate(tqdm(fewshot_sampler)):
         source, query = task
 
         # get train and test
@@ -207,6 +213,18 @@ def eval_fewshot(
         results = get_eval_metrics(labels_query, labels_pred, get_report=False, prefix=f"Kw{n_shot}s_")
 
         results_all.append(results)
+
+        # Every 20 epochs, calculate and plot accuracy
+        if (epoch + 1) % 20 == 0:
+            accuracy = results['Kw256s_acc']  # Adjust key according to your metric
+            accuracy_list.append(accuracy)
+            epoch_list.append(epoch + 1)
+            plt.plot(epoch_list, accuracy_list, label='Accuracy')
+            plt.xlabel('Epoch')
+            plt.ylabel('Accuracy')
+            plt.title('Accuracy over Epochs')
+            plt.legend()
+            plt.show()
 
     # compute metrics for model
     results_df = pd.DataFrame(results_all)
