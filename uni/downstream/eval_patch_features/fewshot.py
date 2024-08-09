@@ -102,7 +102,6 @@ def eval_knn(
     return knn_metrics, knn_dump, proto_metrics, proto_dump, 
 
 
-import matplotlib.pyplot as plt
 
 def eval_fewshot(
     train_feats: torch.Tensor,
@@ -164,11 +163,9 @@ def eval_fewshot(
     n_way = n_way
     n_shot = n_shot
 
-    accuracies = []  # List to store accuracy after every 20 iterations
-
-    for i, task in enumerate(tqdm(fewshot_sampler)):
+    for task in tqdm(fewshot_sampler):
         source, query = task
-    
+
         # get train and test
         feats_source = train_feats[source]
         labels_source = train_labels[source]
@@ -178,18 +175,18 @@ def eval_fewshot(
         else:
             feats_query = test_feats[query]
             labels_query = test_labels[query]
-    
+
         # center
         if center_feats:
             feats_mean = feats_source.mean(dim=0, keepdims=True)
             feats_query = feats_query - feats_mean
             feats_source = feats_source - feats_mean
-    
+
         # normalize
         if normalize_feats:
             feats_source = normalize(feats_source, dim=-1, p=2)
             feats_query = normalize(feats_query, dim=-1, p=2)
-    
+
         # compute prototypes & assert labels are correct
         if average_feats:
             feats_proto = feats_source.view(n_way, n_shot, -1).mean(dim=1)
@@ -202,47 +199,24 @@ def eval_fewshot(
         else:
             feats_proto = feats_source
             labels_proto = labels_source
-    
+
         # classify to prototypes
         pw_dist = (feats_query[:, None] - feats_proto[None, :]).norm(dim=-1, p=2)
-    
+
         labels_pred = labels_proto[pw_dist.min(dim=1).indices]
         results = get_eval_metrics(labels_query, labels_pred, get_report=False, prefix=f"Kw{n_shot}s_")
-    
-        # Print keys in results to debug
-        print(f"Iteration {i + 1}: Available keys in results: {results.keys()}")
-    
+
         results_all.append(results)
-    
-        # Compute accuracy and store it every 20 iterations
-        if (i + 1) % 20 == 0:
-            accuracy = results.get(f"Kw{n_shot}s_acc", None)
-            if accuracy is not None:
-                accuracies.append(accuracy)
-            else:
-                print(f"Key Kw{n_shot}s_accuracy not found at iteration {i + 1}")
 
-
-        # Plot accuracy graph only if there are accuracies collected
-        if accuracies:
-            plt.plot(range(20, len(accuracies) * 20 + 1, 20), accuracies)
-            plt.xlabel('Iterations')
-            plt.ylabel('Accuracy')
-            plt.title('Accuracy over Iterations')
-            plt.show()
-        else:
-            print("No accuracy data available to plot.")
-    
-    
-        # compute metrics for model
-        results_df = pd.DataFrame(results_all)
-        results_agg = dict(
-            zip(
-                list(results_df.columns + "_avg") + list(results_df.columns + "_std"),
-                results_df.agg(["mean", "std"], axis=0).values.flatten(),
-            )
+    # compute metrics for model
+    results_df = pd.DataFrame(results_all)
+    results_agg = dict(
+        zip(
+            list(results_df.columns + "_avg") + list(results_df.columns + "_std"),
+            results_df.agg(["mean", "std"], axis=0).values.flatten(),
         )
-        return results_df, results_agg
+    )
+    return results_df, results_agg
 
 
 class FewShotEpisodeSampler(Sampler):
