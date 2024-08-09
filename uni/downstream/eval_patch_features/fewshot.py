@@ -101,8 +101,6 @@ def eval_knn(
 
     return knn_metrics, knn_dump, proto_metrics, proto_dump, 
 
-
-
 import matplotlib.pyplot as plt
 
 def eval_fewshot(
@@ -211,9 +209,14 @@ def eval_fewshot(
 
         labels_pred = labels_proto[pw_dist.min(dim=1).indices]
         results = get_eval_metrics(labels_query, labels_pred, get_report=False, prefix=f"Kw{n_shot}s_")
+        
+        # Handle potential list values
+        for key, value in results.items():
+            if isinstance(value, list):
+                results[key] = np.mean(value)  # Adjust this as needed
+                print(f"Iteration {i}: Key '{key}' has list value {value}")
 
         results_all.append(results)
-        print(results)
 
         # Every 20 epochs, calculate and plot accuracy
         if (epoch + 1) % 20 == 0:
