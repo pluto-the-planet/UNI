@@ -29,6 +29,7 @@ def eval_knn(
     num_workers: int = 8,
 ):
     """
+    test_patients,
     Evaluate K-Nearest Neighbors (KNN) algorithm for few-shot learning.
     Adapted from https://github.com/mbanani/lgssl/blob/df45bae647fc24dce8a6329eb697944053e9a8a0/lgssl/evaluation/fewshot.py.
 
