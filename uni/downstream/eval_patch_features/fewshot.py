@@ -213,6 +213,7 @@ def eval_fewshot(
         results = get_eval_metrics(labels_query, labels_pred, get_report=False, prefix=f"Kw{n_shot}s_")
 
         results_all.append(results)
+        print(results)
 
         # Every 20 epochs, calculate and plot accuracy
         if (epoch + 1) % 20 == 0:
