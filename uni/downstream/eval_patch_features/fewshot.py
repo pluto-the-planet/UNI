@@ -220,20 +220,20 @@ def eval_fewshot(
 
         # Every 20 epochs, calculate and plot accuracy
         if (epoch + 1) % 20 == 0:
-        print(f"Available keys in results: {results.keys()}")
-        accuracy_key = next((key for key in results.keys() if 'acc' in key.lower()), None)
-        if accuracy_key:
-            accuracy = results[accuracy_key]
-            accuracy_list.append(accuracy)
-            epoch_list.append(epoch + 1)
-            plt.plot(epoch_list, accuracy_list, label='Accuracy')
-            plt.xlabel('Epoch')
-            plt.ylabel('Accuracy')
-            plt.title('Accuracy over Epochs')
-            plt.legend()
-            plt.show()
-        else:
-            print(f"Accuracy key not found in results. Available keys: {results.keys()}")
+            print(f"Available keys in results: {results.keys()}")
+            accuracy_key = next((key for key in results.keys() if 'acc' in key.lower()), None)
+            if accuracy_key:
+                accuracy = results[accuracy_key]
+                accuracy_list.append(accuracy)
+                epoch_list.append(epoch + 1)
+                plt.plot(epoch_list, accuracy_list, label='Accuracy')
+                plt.xlabel('Epoch')
+                plt.ylabel('Accuracy')
+                plt.title('Accuracy over Epochs')
+                plt.legend()
+                plt.show()
+            else:
+                print(f"Accuracy key not found in results. Available keys: {results.keys()}")
 
     # compute metrics for model
     results_df = pd.DataFrame(results_all)
