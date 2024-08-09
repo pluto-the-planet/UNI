@@ -80,6 +80,7 @@ def eval_knn(
     # SimpleShot Eval
     pw_dist = (feats_query[:, None] - feats_proto[None, :]).norm(dim=-1, p=2)
     labels_pred_proto = labels_proto[pw_dist.min(dim=1).indices]
+    print(labels_pred_proto)
     proto_metrics = get_eval_metrics(labels_query, labels_pred_proto, prefix="proto_")
     proto_dump = {
         "preds_all": labels_pred_proto,
@@ -92,6 +93,7 @@ def eval_knn(
     # KNN Eval
     knn = sklearn.neighbors.KNeighborsClassifier(n_neighbors=n_neighbors, n_jobs=num_workers)
     labels_pred_knn = knn.fit(feats_source, labels_source).predict(feats_query)
+    print(labels_pred_knn)
     knn_metrics = get_eval_metrics(labels_query, labels_pred_knn, prefix=f"knn{n_neighbors}_")
     knn_dump = {
         "preds_all": labels_pred_knn,
