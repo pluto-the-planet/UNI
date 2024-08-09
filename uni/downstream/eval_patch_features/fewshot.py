@@ -102,6 +102,8 @@ def eval_knn(
     return knn_metrics, knn_dump, proto_metrics, proto_dump, 
 
 
+import matplotlib.pyplot as plt
+
 def eval_fewshot(
     train_feats: torch.Tensor,
     train_labels: torch.Tensor,
@@ -162,7 +164,9 @@ def eval_fewshot(
     n_way = n_way
     n_shot = n_shot
 
-    for task in tqdm(fewshot_sampler):
+    accuracies = []  # List to store accuracy after every 20 iterations
+
+    for i, task in enumerate(tqdm(fewshot_sampler)):
         source, query = task
 
         # get train and test
@@ -206,6 +210,18 @@ def eval_fewshot(
         results = get_eval_metrics(labels_query, labels_pred, get_report=False, prefix=f"Kw{n_shot}s_")
 
         results_all.append(results)
+
+        # Compute accuracy and store it every 20 iterations
+        if (i + 1) % 20 == 0:
+            accuracy = results["Kw256s_accuracy"]
+            accuracies.append(accuracy)
+
+    # Plot accuracy graph
+    plt.plot(range(20, len(accuracies) * 20 + 1, 20), accuracies)
+    plt.xlabel('Iterations')
+    plt.ylabel('Accuracy')
+    plt.title('Accuracy over Iterations')
+    plt.show()
 
     # compute metrics for model
     results_df = pd.DataFrame(results_all)
