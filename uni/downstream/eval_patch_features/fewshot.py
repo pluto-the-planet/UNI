@@ -214,7 +214,7 @@ def eval_fewshot(
         for key, value in results.items():
             if isinstance(value, list):
                 results[key] = np.mean(value)  # Adjust this as needed
-                print(f"Iteration {i}: Key '{key}' has list value {value}")
+                #print(f"Key '{key}' has list value {value}")
 
         results_all.append(results)
 
