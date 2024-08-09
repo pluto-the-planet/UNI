@@ -32,7 +32,8 @@ def eval_linear_probe(
     valid_labels: torch.Tensor,
     test_feats: torch.Tensor,
     test_labels: torch.Tensor,
-    max_iter: int = 1000,
+    #max_iter: int = 1000,
+    max_iter: int = 2000,
     combine_trainval: bool = True,
     use_sklearn: bool = False,
     prefix: str = "lin_",
@@ -93,7 +94,7 @@ def train_linear_probe(
     train_labels,
     valid_feats,
     valid_labels,
-    max_iter=1000,
+    max_iter=2000,
     combine_trainval=True,
     use_sklearn=False,
     verbose=True,
@@ -187,7 +188,7 @@ def _fit_logreg(
     labels: torch.Tensor,
     cost: float,
     verbose: bool = False,
-    max_iter: int = 100,
+    max_iter: int = 200,
     use_sklearn: bool = False,
 ) -> LogisticRegression:
     """
