@@ -216,7 +216,7 @@ def eval_fewshot(
     
         # Compute accuracy and store it every 20 iterations
         if (i + 1) % 20 == 0:
-            accuracy = results.get(f"Kw{n_shot}s_accuracy", None)
+            accuracy = results.get(f"Kw{n_shot}s_acc", None)
             if accuracy is not None:
                 accuracies.append(accuracy)
             else:
